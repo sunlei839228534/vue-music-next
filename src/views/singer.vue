@@ -1,6 +1,7 @@
 <template>
   <div class="singer" v-loading="!singers.length">
-    <index-list :data="singers"></index-list>
+    <index-list @select="onSelectSinger" :data="singers"></index-list>
+    <router-view :singer="selectedSinger"></router-view>
   </div>
 </template>
 
@@ -16,7 +17,14 @@ export default {
   data() {
     return {
       singers: [],
+      selectedSinger: null,
     };
+  },
+  methods: {
+    onSelectSinger(item) {
+      this.selectedSinger = item;
+      this.$router.push(`/singer/${item.mid}`);
+    },
   },
   async created() {
     const result = await getSingerList();
