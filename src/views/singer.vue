@@ -1,7 +1,11 @@
 <template>
   <div class="singer" v-loading="!singers.length">
     <index-list @select="onSelectSinger" :data="singers"></index-list>
-    <router-view :singer="selectedSinger"></router-view>
+    <router-view v-slot="{ Component }">
+      <transition appear name="slide">
+        <component :is="Component"></component>
+      </transition>
+    </router-view>
   </div>
 </template>
 
