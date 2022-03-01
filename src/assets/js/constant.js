@@ -1,0 +1,1 @@
+export const SINGER_KEY = '__singer_key__'

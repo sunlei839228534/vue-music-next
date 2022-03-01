@@ -13,6 +13,8 @@
 import { getSingerDetailList } from "@/service/singer";
 import { getSongs } from "@/service/song";
 import MusicList from "@/components/music-list/music-list.vue";
+import { SINGER_KEY } from "@/assets/js/constant";
+import goodStorage from "good-storage";
 
 export default {
   name: "singer-detail",
@@ -31,16 +33,35 @@ export default {
     };
   },
   async created() {
-    const result = await getSingerDetailList(this.singer.mid);
+    const computedSinger = this.computedSinger;
+    if (!computedSinger) {
+      const path = this.$route.matched[0].path;
+      this.$router.push({
+        path,
+      });
+      return;
+    }
+    const result = await getSingerDetailList(computedSinger.mid);
     this.songs = await getSongs(result.songs);
     this.loading = false;
   },
   computed: {
+    computedSinger() {
+      let ret = this.singer;
+      if (ret) {
+        return ret;
+      } else {
+        ret = goodStorage.session.get(SINGER_KEY);
+      }
+      return ret;
+    },
     pic() {
-      return this.singer && this.singer.pic;
+      const computedSinger = this.computedSinger;
+      return computedSinger && computedSinger.pic;
     },
     title() {
-      return this.singer && this.singer.name;
+      const computedSinger = this.computedSinger;
+      return computedSinger && computedSinger.name;
     },
   },
 };
