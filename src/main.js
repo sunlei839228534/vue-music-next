@@ -4,9 +4,11 @@ import router from './router'
 import store from './store'
 import lazyPlugin from 'vue3-lazy'
 import loadingDirective from '@/components/base/loading/directive'
+import noResultDirective from '@/components/base/no-result/directive'
+
 
 import "@/assets/scss/index.scss"
 
 createApp(App).use(lazyPlugin, {
   loading: require('@/assets/images/default.png')
-}).directive('loading', loadingDirective).use(store).use(router).mount('#app')
+}).directive('loading', loadingDirective).directive('no-result', noResultDirective).use(store).use(router).mount('#app')
