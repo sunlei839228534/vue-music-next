@@ -18,3 +18,16 @@ export function randomPlay({ commit }, list) {
   commit('setPlayList', shuffle(list))
   commit('setCurrentIndex', 0)
 }
+
+export function changeMode({ commit, state, getters }, mode) {
+  const currentSongId = getters.currentSong.id
+  if (PLAY_MODE.random === mode) {
+    commit('setPlayList', shuffle(state.sequenceList))
+  } else {
+    commit('setPlayList', state.sequenceList)
+  }
+  const index = state.playList.findIndex(song => song.id === currentSongId)
+
+  commit('setCurrentIndex', index)
+  commit('setPlayMode', mode)
+}
