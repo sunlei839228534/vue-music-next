@@ -12,6 +12,19 @@
         <h2 class="subtitle">{{ currentSong.singer }}</h2>
       </div>
       <div class="bottom">
+        <div class="progress-wrapper">
+          <span class="time time-l">{{ formatTime(currentTime) }}</span>
+          <div class="progress-bar-wrapper">
+            <progress-bar
+              @progress-changing="onProgressChanging"
+              @progress-changed="onProgressChanged"
+              :progress="progress"
+            ></progress-bar>
+          </div>
+          <span class="time time-r">{{
+            formatTime(currentSong.duration)
+          }}</span>
+        </div>
         <div class="operators">
           <div class="icon i-left">
             <i @click="changeMode" :class="modeIcon"></i>
@@ -26,7 +39,10 @@
             <i @click="next" class="icon-next"></i>
           </div>
           <div class="icon i-right">
-            <i class="icon-not-favorite"></i>
+            <i
+              @click="toggleFavorite(currentSong)"
+              :class="getFavoriteIcon(currentSong)"
+            ></i>
           </div>
         </div>
       </div>
@@ -36,6 +52,8 @@
       @error="error"
       @canplay="onReady"
       @pause="pause"
+      @timeupdate="updateTime"
+      @ended="end"
     ></audio>
   </div>
 </template>
@@ -44,20 +62,29 @@
 import { useStore } from "vuex";
 import { computed, ref, watch } from "vue";
 import useMode from "./use-mode";
+import useFavorite from "./use-favorite";
+import ProgressBar from "./progress-bar.vue";
+import { formatTime } from "@/assets/js/util";
+import { PLAY_MODE } from "@/assets/js/constant";
 
 export default {
   name: "player",
+  components: {
+    ProgressBar,
+  },
   setup() {
     //data
     const audioRef = ref(null);
     const songReady = ref(false);
+    const currentTime = ref(0);
+    const progressChanging = ref(false);
 
     //vuex
     const store = useStore();
 
     //hooks
     const { modeIcon, changeMode } = useMode();
-
+    const { getFavoriteIcon, toggleFavorite } = useFavorite();
     //computed
     const playlist = computed(() => store.state.playList);
     const currentSong = computed(() => store.getters.currentSong);
@@ -70,12 +97,17 @@ export default {
     const disableCls = computed(() => {
       return songReady.value ? "" : "disable";
     });
+    const progress = computed(() => {
+      return currentTime.value / currentSong.value.duration;
+    });
+    const mode = computed(() => store.state.playMode);
 
     //watch
     watch(currentSong, (newSong) => {
       if (!newSong.url || !newSong.id) {
         return;
       }
+      currentTime.value = 0;
       songReady.value = false;
       const audioEl = audioRef.value;
       audioEl.src = newSong.url;
@@ -142,11 +174,41 @@ export default {
       if (songReady.value) return;
       songReady.value = true;
     }
+
     function error() {
       songReady.value = true;
     }
 
+    function updateTime(e) {
+      if (!progressChanging.value) {
+        currentTime.value = e.target.currentTime;
+      }
+    }
+    function onProgressChanging(progress) {
+      progressChanging.value = true;
+      currentTime.value = currentSong.value.duration * progress;
+    }
+
+    function onProgressChanged(progress) {
+      progressChanging.value = false;
+      audioRef.value.currentTime = currentTime.value =
+        currentSong.value.duration * progress;
+      if (!playing.value) {
+        store.commit("setPlayingState", true);
+      }
+    }
+
+    function end() {
+      currentTime.value = 0;
+      if (mode.value === PLAY_MODE.loop) {
+        loop();
+      } else {
+        next();
+      }
+    }
+
     return {
+      currentTime,
       currentSong,
       fullScreen,
       audioRef,
@@ -161,6 +223,14 @@ export default {
       error,
       modeIcon,
       changeMode,
+      getFavoriteIcon,
+      updateTime,
+      toggleFavorite,
+      formatTime,
+      progress,
+      onProgressChanged,
+      onProgressChanging,
+      end,
     };
   },
 };
@@ -226,6 +296,29 @@ export default {
       position: absolute;
       bottom: 50px;
       width: 100%;
+      .progress-wrapper {
+        display: flex;
+        align-items: center;
+        width: 80%;
+        margin: 0px auto;
+        padding: 10px 0;
+        .time {
+          color: $color-text;
+          font-size: $font-size-small;
+          flex: 0 0 40px;
+          line-height: 30px;
+          width: 40px;
+          &.time-l {
+            text-align: left;
+          }
+          &.time-r {
+            text-align: right;
+          }
+        }
+        .progress-bar-wrapper {
+          flex: 1;
+        }
+      }
       .operators {
         display: flex;
         align-items: center;
