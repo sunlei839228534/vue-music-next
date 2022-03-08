@@ -33,6 +33,10 @@ export default {
     };
   },
   methods: {
+    setOffset(progress) {
+      const barWidth = this.$el.clientWidth - progressBtnWidth;
+      this.offset = barWidth * progress;
+    },
     touchstart(e) {
       this.touch.x1 = e.touches[0].pageX;
       this.touch.beginWidth = this.$refs.progress.clientWidth;
@@ -63,8 +67,7 @@ export default {
   },
   watch: {
     progress(newProgress) {
-      const barWidth = this.$el.clientWidth - progressBtnWidth;
-      this.offset = barWidth * newProgress;
+      this.setOffset(newProgress);
     },
   },
 
