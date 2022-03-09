@@ -1,6 +1,6 @@
 <template>
   <div class="player" v-show="playlist.length">
-    <transition name="normal">
+    <transition name="normal" @enter="enter" @after-enter="afterEnter">
       <div class="normal-player" v-show="fullScreen">
         <div class="background">
           <img :src="currentSong.pic" alt="" />
@@ -19,7 +19,7 @@
           @touchend.prevent="onMiddleTouchEnd"
         >
           <div class="middle-l" :style="middleLStyle">
-            <div class="cd-wrapper">
+            <div class="cd-wrapper" ref="cdWrapperRef">
               <div class="cd" ref="cdRef">
                 <img
                   ref="cdImageRef"
@@ -118,6 +118,7 @@ import useFavorite from "./use-favorite";
 import useCd from "./use-cd";
 import useLyric from "./use-lyric";
 import useMiddleInteractive from "./use-middle-interactive";
+import useAnimation from "./use-animation";
 import Scroll from "@/components/base/scroll/scroll";
 import MiniPlayer from "@/components/player/mini-player";
 import ProgressBar from "./progress-bar.vue";
@@ -164,6 +165,8 @@ export default {
       middleRStyle,
       currentShow,
     } = useMiddleInteractive();
+    const { cdWrapperRef, enter, afterEnter, leave, afterLeave } =
+      useAnimation();
 
     //computed
     const playlist = computed(() => store.state.playList);
@@ -348,6 +351,12 @@ export default {
       middleLStyle,
       middleRStyle,
       currentShow,
+      //animation
+      cdWrapperRef,
+      enter,
+      afterEnter,
+      leave,
+      afterLeave,
     };
   },
 };
