@@ -1,6 +1,12 @@
 <template>
   <div class="player" v-show="playlist.length">
-    <transition name="normal" @enter="enter" @after-enter="afterEnter">
+    <transition
+      name="normal"
+      @enter="enter"
+      @after-enter="afterEnter"
+      @leave="leave"
+      @after-leave="afterLeave"
+    >
       <div class="normal-player" v-show="fullScreen">
         <div class="background">
           <img :src="currentSong.pic" alt="" />
@@ -195,6 +201,7 @@ export default {
       const audioEl = audioRef.value;
       audioEl.src = newSong.url;
       audioEl.play();
+      store.commit("setPlayingState", true);
     });
     watch(playing, (newPlaying) => {
       if (!songReady.value) return;

@@ -11,7 +11,7 @@
 
 <script>
 import { getSingerList } from "@/service/singer.js";
-import IndexList from "@/components/base/index-list/index-list";
+import IndexList from "@/components/index-list/index-list";
 import { SINGER_KEY } from "@/assets/js/constant";
 import goodStorage from "good-storage";
 

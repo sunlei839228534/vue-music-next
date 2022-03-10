@@ -29,9 +29,9 @@
 </template>
 
 <script>
-import Scroll from "@/components/base/scroll/scroll.vue";
+import Scroll from "@/components/wrap-scroll";
 import SongList from "@/components/base/song-list/song-list.vue";
-import { mapActions } from "vuex";
+import { mapActions, mapState } from "vuex";
 
 const RESERVED_HEIGHT = 40;
 
@@ -114,8 +114,10 @@ export default {
       };
     },
     scrollStyle() {
+      const bottom = this.playList.length ? "60px" : 0;
       return {
         top: `${this.imageHeight}px`,
+        bottom,
       };
     },
     filterStyle() {
@@ -131,6 +133,7 @@ export default {
         backdropFilter: `blur(${blur}px)`,
       };
     },
+    ...mapState(["playList"]),
   },
   components: {
     Scroll,
