@@ -19,8 +19,17 @@
       </div>
     </div>
     <div class="search-result" v-show="query">
-      <suggest :query="query"></suggest>
+      <suggest
+        @select-singer="selectSinger"
+        @select-song="selectSong"
+        :query="query"
+      ></suggest>
     </div>
+    <router-view v-slot="{ Component }">
+      <transition appear name="slide">
+        <component :is="Component" :data="selectedSinger"></component>
+      </transition>
+    </router-view>
   </div>
 </template>
 
@@ -29,6 +38,10 @@ import SearchInput from "@/components/search/search-input";
 import Suggest from "@/components/search/suggest";
 import { ref } from "vue";
 import { getHotKeys } from "@/service/search";
+import { useStore } from "vuex";
+import { useRouter } from "vue-router";
+import goodStorage from "good-storage";
+import { SINGER_KEY } from "@/assets/js/constant";
 
 export default {
   name: "search",
@@ -44,6 +57,10 @@ export default {
   setup() {
     const query = ref("");
     const hotKeys = ref([]);
+    const store = useStore();
+    const selectedSinger = ref(null);
+
+    const router = useRouter();
 
     //在 Composition API 中，setup 函数相当于 created 生命周期
 
@@ -54,11 +71,28 @@ export default {
     function addQuery(s) {
       query.value = s;
     }
+    function selectSong(song) {
+      store.dispatch("addSong", song);
+    }
+    function selectSinger(singer) {
+      selectedSinger.value = singer;
+      cacheSinger(singer);
+      router.push({
+        path: `/search/${singer.mid}`,
+      });
+    }
+
+    function cacheSinger(singer) {
+      goodStorage.session.set(SINGER_KEY, singer);
+    }
 
     return {
       query,
       hotKeys,
       addQuery,
+      selectSong,
+      selectSinger,
+      selectedSinger,
     };
   },
 };

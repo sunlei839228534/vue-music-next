@@ -6,13 +6,18 @@
     v-loading:[loadingText]="loading"
   >
     <ul class="suggest-list">
-      <li class="suggest-item" v-if="singer">
+      <li @click="selectSinger(singer)" class="suggest-item" v-if="singer">
         <div class="icon"><i class="icon-mine"></i></div>
         <div class="name">
           <p class="text">{{ singer.name }}</p>
         </div>
       </li>
-      <li class="suggest-item" v-for="song in songs" :key="song.id">
+      <li
+        @click="selectSong(song)"
+        class="suggest-item"
+        v-for="song in songs"
+        :key="song.id"
+      >
         <div class="icon"><i class="icon-music"></i></div>
         <div class="name">
           <p class="text">{{ song.singer }} - {{ song.name }}</p>
@@ -38,14 +43,14 @@ export default {
       default: true,
     },
   },
-  setup(props) {
+  emits: ["select-song"],
+  setup(props, { emit }) {
     const singer = ref(null);
     const songs = ref([]);
     const hasMore = ref(true);
     const page = ref(1);
     const loadingText = ref("");
-
-    const { rootRef, isPullUpLoad, scroll } = usePullUpLoad(searchMore);
+    const manualLoading = ref(false);
 
     const loading = computed(() => {
       return !singer.value && !songs.value.length;
@@ -56,7 +61,13 @@ export default {
     const pullUpLoading = computed(() => {
       return isPullUpLoad.value && hasMore.value;
     });
-
+    const preventPullUpLoad = computed(() => {
+      return loading.value || manualLoading.value;
+    });
+    const { rootRef, isPullUpLoad, scroll } = usePullUpLoad(
+      searchMore,
+      preventPullUpLoad
+    );
     watch(
       () => props.query,
       async (newQuery) => {
@@ -94,8 +105,17 @@ export default {
 
     async function makeItScrollable() {
       if (scroll.value.maxScrollY >= -1) {
+        manualLoading.value = true;
         await searchMore();
+        manualLoading.value = false;
       }
+    }
+
+    function selectSong(song) {
+      emit("select-song", song);
+    }
+    function selectSinger(singer) {
+      emit("select-singer", singer);
     }
 
     return {
@@ -109,6 +129,8 @@ export default {
       // pullUpLoad
       rootRef,
       pullUpLoading,
+      selectSong,
+      selectSinger,
     };
   },
 };

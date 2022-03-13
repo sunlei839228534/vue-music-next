@@ -39,9 +39,9 @@ export default function createDetailComponent(name, key, fetch) {
           return ret;
         } else {
           const cached = goodStorage.session.get(key)
+
           if (cached && (cached.mid || cached.id + '') === this.$route.params.id) {
             ret = goodStorage.session.get(key);
-
           }
         }
         return ret;
