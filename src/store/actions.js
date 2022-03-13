@@ -68,7 +68,7 @@ export function addSong({ commit, state }, song) {
   const playList = state.playList.slice()
   const sequenceList = state.sequenceList.slice()
 
-  const currentIndex = state.currentIndex
+  let currentIndex = state.currentIndex
   const playIndex = findIndex(playList, song)
 
   if (playIndex > -1) {
@@ -83,12 +83,11 @@ export function addSong({ commit, state }, song) {
   if (sequenceIndex === -1) {
     sequenceList.push(song)
   }
-
   commit('setSequenceList', sequenceList)
   commit('setPlayList', playList)
   commit('setCurrentIndex', currentIndex)
-  commit('playingState', true)
-  commit('fullScreen', true)
+  commit('setPlayingState', true)
+  commit('setFullScreen', true)
 }
 
 function findIndex(list, song) {

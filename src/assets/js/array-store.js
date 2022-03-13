@@ -22,7 +22,6 @@ function deleteFromArray(arr, compare) {
 }
 
 export function save(item, key, compare, maxLen) {
-
   const items = storage.get(key, [])
   insertArray(items, item, compare)
   storage.set(key, items)

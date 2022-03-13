@@ -17,6 +17,12 @@
           </li>
         </ul>
       </div>
+      <div class="search-history" v-show="searchHistory.length">
+        <h1 class="title">
+          <span class="text">搜索历史</span>
+        </h1>
+        <search-list :searches="searchHistory"> </search-list>
+      </div>
     </div>
     <div class="search-result" v-show="query">
       <suggest
@@ -25,6 +31,7 @@
         :query="query"
       ></suggest>
     </div>
+
     <router-view v-slot="{ Component }">
       <transition appear name="slide">
         <component :is="Component" :data="selectedSinger"></component>
@@ -36,18 +43,22 @@
 <script>
 import SearchInput from "@/components/search/search-input";
 import Suggest from "@/components/search/suggest";
-import { ref } from "vue";
+import SearchList from "@/components/search/search-list";
+import goodStorage from "good-storage";
+
+import { computed, ref } from "vue";
 import { getHotKeys } from "@/service/search";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
-import goodStorage from "good-storage";
 import { SINGER_KEY } from "@/assets/js/constant";
+import useSearchHistory from "@/components/search/use-search-history";
 
 export default {
   name: "search",
   components: {
     SearchInput,
     Suggest,
+    SearchList,
   },
   data() {
     return {
@@ -62,6 +73,10 @@ export default {
 
     const router = useRouter();
 
+    const searchHistory = computed(() => store.state.searchHistory);
+
+    const { saveSearch } = useSearchHistory();
+
     //在 Composition API 中，setup 函数相当于 created 生命周期
 
     getHotKeys().then((result) => {
@@ -72,9 +87,11 @@ export default {
       query.value = s;
     }
     function selectSong(song) {
+      saveSearch(query.value);
       store.dispatch("addSong", song);
     }
     function selectSinger(singer) {
+      saveSearch(query.value);
       selectedSinger.value = singer;
       cacheSinger(singer);
       router.push({
@@ -93,6 +110,7 @@ export default {
       selectSong,
       selectSinger,
       selectedSinger,
+      searchHistory,
     };
   },
 };
