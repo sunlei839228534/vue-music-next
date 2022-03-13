@@ -6,7 +6,7 @@ export function getSongs(songs) {
     return songs.map(i => {
       i.url = map[i.mid]
       return i
-    }).filter(i => i.url.indexOf('vkey') > -1)
+    }).filter(i => i.url && i.url.indexOf('vkey') > -1)
   })
 }
 
