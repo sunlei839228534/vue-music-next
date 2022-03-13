@@ -1,4 +1,5 @@
 import storage from 'good-storage'
+import { storeKey } from 'vuex'
 
 function insertArray(arr, val, compare, maxLen) {
   const index = arr.findIndex(compare)
@@ -37,4 +38,9 @@ export function remove(key, compare) {
 
 export function load(key) {
   return storage.get(key, [])
+}
+
+export function clear(key) {
+  storage.remove(key)
+  return []
 }

@@ -3,27 +3,43 @@
     <div class="search-input-wrapper">
       <search-input v-model="query"></search-input>
     </div>
-    <div class="search-content" v-show="!query">
-      <div class="hot-keys">
-        <h1 class="title">热门搜索</h1>
-        <ul>
-          <li
-            @click="addQuery(item.key)"
-            v-for="item in hotKeys"
-            :key="item.id"
-            class="item"
+    <scroll ref="scrollRef" class="search-content" v-show="!query">
+      <div>
+        <div class="hot-keys">
+          <h1 class="title">热门搜索</h1>
+          <ul>
+            <li
+              @click="addQuery(item.key)"
+              v-for="item in hotKeys"
+              :key="item.id"
+              class="item"
+            >
+              <span>{{ item.key }}</span>
+            </li>
+          </ul>
+        </div>
+        <div class="search-history" v-show="searchHistory.length">
+          <h1 class="title">
+            <span class="text">搜索历史</span>
+            <span class="clear" @click="showConfirm">
+              <i class="icon-clear"></i>
+            </span>
+          </h1>
+          <confirm
+            text="是否清空所有搜索历史"
+            confirm-btn-text="清空"
+            ref="confirmRef"
+            @confirm="clearSearch"
+          ></confirm>
+          <search-list
+            @select="addQuery"
+            @delete="deleteSearch"
+            :searches="searchHistory"
           >
-            <span>{{ item.key }}</span>
-          </li>
-        </ul>
+          </search-list>
+        </div>
       </div>
-      <div class="search-history" v-show="searchHistory.length">
-        <h1 class="title">
-          <span class="text">搜索历史</span>
-        </h1>
-        <search-list :searches="searchHistory"> </search-list>
-      </div>
-    </div>
+    </scroll>
     <div class="search-result" v-show="query">
       <suggest
         @select-singer="selectSinger"
@@ -31,7 +47,6 @@
         :query="query"
       ></suggest>
     </div>
-
     <router-view v-slot="{ Component }">
       <transition appear name="slide">
         <component :is="Component" :data="selectedSinger"></component>
@@ -43,10 +58,12 @@
 <script>
 import SearchInput from "@/components/search/search-input";
 import Suggest from "@/components/search/suggest";
-import SearchList from "@/components/search/search-list";
+import SearchList from "@/components/base/search-list/search-list";
+import Scroll from "@/components/wrap-scroll";
+import Confirm from "@/components/base/confirm/confirm";
 import goodStorage from "good-storage";
 
-import { computed, ref } from "vue";
+import { computed, nextTick, ref, watch } from "vue";
 import { getHotKeys } from "@/service/search";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
@@ -59,6 +76,8 @@ export default {
     SearchInput,
     Suggest,
     SearchList,
+    Scroll,
+    Confirm,
   },
   data() {
     return {
@@ -70,18 +89,31 @@ export default {
     const hotKeys = ref([]);
     const store = useStore();
     const selectedSinger = ref(null);
+    const scrollRef = ref(null);
+    const confirmRef = ref(null);
 
     const router = useRouter();
 
     const searchHistory = computed(() => store.state.searchHistory);
 
-    const { saveSearch } = useSearchHistory();
+    const { saveSearch, deleteSearch, clearSearch } = useSearchHistory();
 
     //在 Composition API 中，setup 函数相当于 created 生命周期
 
     getHotKeys().then((result) => {
       hotKeys.value = result.hotKeys;
     });
+
+    watch(query, async (newQuery) => {
+      if (!newQuery) {
+        await nextTick();
+        refreshScroll();
+      }
+    });
+
+    function refreshScroll() {
+      scrollRef.value.scroll.refresh();
+    }
 
     function addQuery(s) {
       query.value = s;
@@ -103,7 +135,13 @@ export default {
       goodStorage.session.set(SINGER_KEY, singer);
     }
 
+    function showConfirm() {
+      console.log(confirmRef.value);
+      confirmRef.value.show();
+    }
+
     return {
+      scrollRef,
       query,
       hotKeys,
       addQuery,
@@ -111,6 +149,11 @@ export default {
       selectSinger,
       selectedSinger,
       searchHistory,
+      deleteSearch,
+      //confirm
+      confirmRef,
+      showConfirm,
+      clearSearch,
     };
   },
 };
