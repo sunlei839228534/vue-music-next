@@ -2,8 +2,15 @@
   <m-header></m-header>
   <tab />
   <router-view :style="viewStyle" v-slot="{ Component }">
-    <transition appear name="slide">
+    <keep-alive>
       <component :is="Component"></component>
+    </keep-alive>
+  </router-view>
+  <router-view :style="viewStyle" name="user" v-slot="{ Component }">
+    <transition appear name="slide">
+      <keep-alive>
+        <component :is="Component"></component>
+      </keep-alive>
     </transition>
   </router-view>
   <player></player>
