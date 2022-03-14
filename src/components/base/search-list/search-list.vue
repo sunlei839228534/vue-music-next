@@ -8,7 +8,7 @@
         v-for="item in searches"
       >
         <span class="text">{{ item }}</span>
-        <span class="icon" @click.stop="deleteItem(item)">
+        <span v-if="showDelete" class="icon" @click.stop="deleteItem(item)">
           <i class="icon-delete"></i>
         </span>
       </li>
@@ -24,6 +24,10 @@ export default {
       type: Array,
       default() {
         return [];
+      },
+      showDelete: {
+        type: Boolean,
+        default: true,
       },
     },
   },

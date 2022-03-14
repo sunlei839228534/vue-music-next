@@ -3,13 +3,15 @@ import { storeKey } from 'vuex'
 
 function insertArray(arr, val, compare, maxLen) {
   const index = arr.findIndex(compare)
-  if (index > -1) {
+  if (index === 0) {
     return
-  } else {
-    arr.unshift(val)
-    if (maxLen && arr.length > maxLen) {
-      arr.pop()
-    }
+  }
+  if (index > 0) {
+    arr.splice(index, 1)
+  }
+  arr.unshift(val)
+  if (maxLen && arr.length > maxLen) {
+    arr.pop()
   }
 }
 

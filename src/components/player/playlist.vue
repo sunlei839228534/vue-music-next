@@ -35,6 +35,12 @@
               </li>
             </transition-group>
           </scroll>
+          <div class="list-add">
+            <div class="add" @click="showAddSong">
+              <i class="icon-add"></i>
+              <span class="text">添加歌曲到队列</span>
+            </div>
+          </div>
           <div class="list-footer">
             <span @click="hide">关闭</span>
           </div>
@@ -45,6 +51,7 @@
           text="是否清空播放列表"
           confirmBtnText="清空"
         ></confirm>
+        <add-song ref="addSongRef"></add-song>
       </div>
     </transition>
   </teleport>
@@ -57,12 +64,14 @@ import { useStore } from "vuex";
 import useMode from "./use-mode";
 import useFavorite from "./use-favorite";
 import Confirm from "@/components/base/confirm/confirm";
+import AddSong from "@/components/add-song/add-song";
 
 export default {
   name: "playlist",
   components: {
     Scroll,
     Confirm,
+    AddSong,
   },
   setup() {
     const visible = ref(false);
@@ -70,6 +79,7 @@ export default {
     const scrollRef = ref(null);
     const songListRef = ref(null);
     const confirmRef = ref(null);
+    const addSongRef = ref(null);
 
     const store = useStore();
     const playlist = computed(() => store.state.playList);
@@ -148,6 +158,10 @@ export default {
       hide();
     }
 
+    function showAddSong() {
+      addSongRef.value.show();
+    }
+
     return {
       visible,
       playlist,
@@ -169,6 +183,8 @@ export default {
       showConfirm,
       confirmRef,
       confirmClear,
+      showAddSong,
+      addSongRef,
     };
   },
 };

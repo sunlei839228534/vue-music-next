@@ -130,6 +130,7 @@ import MiniPlayer from "@/components/player/mini-player";
 import ProgressBar from "./progress-bar.vue";
 import { formatTime } from "@/assets/js/util";
 import { PLAY_MODE } from "@/assets/js/constant";
+import usePlayHistory from "./use-play-history";
 
 export default {
   name: "player",
@@ -173,6 +174,7 @@ export default {
     } = useMiddleInteractive();
     const { cdWrapperRef, enter, afterEnter, leave, afterLeave } =
       useAnimation();
+    const { savePlay } = usePlayHistory();
 
     //computed
     const playlist = computed(() => store.state.playList);
@@ -277,6 +279,7 @@ export default {
       if (songReady.value) return;
       songReady.value = true;
       playLyric();
+      savePlay(currentSong.value);
     }
 
     function error() {
